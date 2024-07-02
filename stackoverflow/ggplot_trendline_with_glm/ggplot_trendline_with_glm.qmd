@@ -1,0 +1,58 @@
+---
+title: "ggplot trendline with glm"
+format: html
+editor: source
+---
+
+```{r}
+#| echo: false
+
+library(ggplot2)
+
+data <- data.frame(
+  year = 2014:2023,
+  totglp = c(27, 73, 125, 225, 266, 368, 466, 820, 1383, 2167)
+)
+```
+
+That code is producing infinite values (i.e., `Inf`) when you attempt to exponentiate the year values and thus errors that prevent drawing a line.
+
+Instead of exponentiating the predictors, you might instead try logging the outcomes (i.e., `formula = log(y) ~ x`). While this will draw a trend line, it won't translate the `log(y)` values back to the original, non-logged scale when plotting because this **is not** a feature of a linear model (i.e., `lm`).
+
+```{r}
+ggplot(data, aes(x = year, y = totglp)) +
+  geom_point() +
+  geom_smooth(method = "lm", formula = log(y) ~ x, se = FALSE)
+```
+
+As an alternative, you could manage the model fitting and back translation yourself and then use `geom_function()`.
+
+```{r}
+# fit the model outside of ggplot
+m <- lm(log(totglp) ~ year, data)
+
+# make a function that predicts on the original, non-logged scale
+trend <- function(x, m) {
+  d <- data.frame(year = x)
+  log_pred <- predict(m, newdata = d)
+  exp(log_pred)
+}
+
+# and use geom_function()
+ggplot(data, aes(x = year, y = totglp)) +
+  geom_point() +
+  geom_function(fun = trend, args = list(m = m), color = "blue")
+```
+
+But that's a bit of coding. So instead you could fit a Gaussian generalized linear model (GLM) with a [log link](https://en.wikipedia.org/wiki/Generalized_linear_model#Link_function) function. This both accounts for the loglinear relationship via the link function and will also translate the predictions back to the original, non-logged scale when plotting because this **is** a feature of a GLM (i.e., `glm`).
+
+```{r}
+ggplot(data, aes(x = year, y = totglp)) +
+  geom_point() +
+  geom_smooth(
+    method = "glm", 
+    formula = y ~ x, 
+    se = FALSE, 
+    method.args = list(family = gaussian(link = "log"))
+  )
+```
