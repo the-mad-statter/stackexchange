@@ -1,0 +1,16 @@
+.multi-wrapper .non-selected-wrapper {
+  background: black;
+}
+.multi-wrapper .selected-wrapper { 
+  background: black; 
+}
+.multi-wrapper .item {
+  color: white;
+}
+.multi-wrapper .non-selected-wrapper .item.selected {
+  opacity: .5;
+  color: white;
+}
+.multi-wrapper .selected-wrapper .item {
+  color: white;
+}
