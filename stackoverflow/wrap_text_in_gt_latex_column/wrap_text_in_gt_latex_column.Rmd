@@ -1,0 +1,57 @@
+---
+title: "Untitled"
+author: "test"
+date: "`r Sys.Date()`"
+output:
+  pdf_document:
+    keep_tex: true
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+
+library(tidyverse)
+library(gt)
+```
+
+# A cols_width() solution
+
+```{r}
+islands_tbl <- 
+  tibble(
+    name = names(islands),
+    size = islands
+  ) |>
+  arrange(desc(size)) |>
+  slice(1:10) |>
+  mutate(name = if_else(name == "Asia", "Asia shares the landmass of Eurasia with Europe, and of Afro-Eurasia with both Europe and Africa. In general terms, it is bounded on the east by the Pacific Ocean, on the south by the Indian Ocean, and on the north by the Arctic Ocean.", name))
+
+gt(islands_tbl)  |>
+  cols_width(name ~ px(125)) |>
+  as_latex()
+```
+
+# A LaTeX post-process solution
+
+```{r}
+islands_tbl <- 
+  tibble(
+    name = names(islands),
+    size = islands
+  ) |>
+  arrange(desc(size)) |>
+  slice(1:10) |>
+  mutate(name = if_else(name == "Asia", "Asia shares the landmass of Eurasia with Europe, and of Afro-Eurasia with both Europe and Africa. In general terms, it is bounded on the east by the Pacific Ocean, on the south by the Indian Ocean, and on the north by the Arctic Ocean.", name))
+
+latex_table <- gt(islands_tbl)  |>
+  as_latex()
+
+latex_table[[1]] <- sub(
+  "\\begin{longtable}{lr}", 
+  "\\begin{longtable}{p{4.5cm}r}", 
+  latex_table[[1]], 
+  fixed = TRUE
+)
+
+latex_table
+```
