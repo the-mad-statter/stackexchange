@@ -1,0 +1,69 @@
+---
+title: "Untitled"
+author: "test"
+date: "`r Sys.Date()`"
+output:
+  pdf_document:
+    keep_tex: true
+---
+  
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = FALSE)
+
+library(gt)
+library(gtsummary)
+```
+
+```{r}
+data(trial)
+
+attr(trial$stage, "label") <- 
+  "Treatment stage [This is a long explanation that cannot go anywhere else.]"
+
+m1 <- glm(response ~ age + stage, trial, family = binomial)
+```
+
+# Narrow Width
+
+```{r}
+m1 %>%
+  tbl_regression(exponentiate = TRUE) |>
+  as_gt() |> 
+  cols_width(2 ~ px(100)) |>
+  as_latex()
+```
+
+# Wider Width
+
+```{r}
+m1 %>%
+  tbl_regression(exponentiate = TRUE) |>
+  as_gt() |>
+  cols_width(label ~ px(325)) |>
+  as_latex()
+```
+
+```{r}
+m1 %>%
+  tbl_regression(exponentiate = TRUE) |>
+  class()
+  
+m1 %>%
+  tbl_regression(exponentiate = TRUE) |>
+  as_gt() |>
+  class()
+
+# works
+m1 %>%
+  tbl_regression(exponentiate = TRUE) |> 
+  show_header_names()
+
+if(FALSE) {
+  # does not work
+  m1 %>%
+    tbl_regression(exponentiate = TRUE) |>
+    as_gt() |> 
+    show_header_names()
+}
+```
+
