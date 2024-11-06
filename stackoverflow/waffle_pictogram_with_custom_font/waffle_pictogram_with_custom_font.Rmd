@@ -1,0 +1,78 @@
+---
+title: "Untitled"
+output: html_document
+date: "2024-07-17"
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+First make a custom font using FontForge and install to C:/Windows/Fonts/
+
+Then install custom version of {waffle} that does not lookup unicodes for fontawesome
+
+```{r}
+remotes::install_github("the-mad-statter/waffle") # version of waffle that does not lookup fontawesome unicodes
+```
+
+Then make sure the font is available to ggplot
+
+```{r}
+sysfonts::font_add(
+  family = "r_logo",
+  regular = "C:/Windows/Fonts/r_logo.ttf" # make sure file is actually located here via a directory listing
+)
+
+showtext::showtext_auto()
+```
+
+Finally make the waffle plot
+
+```{r}
+library(dplyr)
+library(hrbrthemes)
+library(waffle)
+
+data.frame(
+  parts = factor(rep(month.abb[1:3], 3), levels=month.abb[1:3]),
+  vals = c(10, 20, 30, 6, 14, 40, 30, 20, 10),
+  col = rep(c("navy", "black", "maroon"), 3),
+  fct = c(
+    rep("Thing 1", 3),
+    rep("Thing 2", 3),
+    rep("Thing 3", 3)
+  )
+) -> xdf
+
+xdf %>%
+  count(parts, wt = vals) %>%
+  ggplot(
+    aes(label = parts, values = n)
+  ) +
+  geom_pictogram(
+    n_rows = 10, 
+    aes(colour = parts), 
+    flip = TRUE, 
+    make_proportional = TRUE,
+    family = "r_logo" # specify family here
+  ) +
+  scale_color_manual(
+    name = NULL,
+    values = c("#a40000", "#c68958", "#ae6056"),
+    labels = c("Fruit", "Sammich", "Pizza")
+  ) +
+  scale_label_pictogram(
+    name = NULL,
+    values = rep("a", 3), # r_logo.svg filed under character "a" in r_logo.ttf using FontForge
+    labels = c("Fruit", "Sammich", "Pizza")
+  ) +
+  coord_equal() +
+  theme_ipsum_rc(grid="") +
+  theme_enhance_waffle() +
+  theme(
+    legend.key.height = unit(2.25, "line"),
+    legend.text = element_text(size = 10, hjust = 0, vjust = 0.75)
+  ) 
+```
+

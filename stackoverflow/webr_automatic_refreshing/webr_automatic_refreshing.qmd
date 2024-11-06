@@ -1,0 +1,10 @@
+---
+title: "{webR} Automatic Refreshing"
+format: html
+include-in-header:
+  text: <script type="text/javascript" src="infinite-refresh.js"></script>
+---
+
+```{r}
+format(Sys.time(), "%Y-%m-%d %H:%M:%S %Z")
+```

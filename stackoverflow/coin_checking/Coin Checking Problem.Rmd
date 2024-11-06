@@ -1,0 +1,86 @@
+---
+title: "Untitled"
+output: html_document
+date: "2024-09-29"
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+
+library(dplyr)
+library(ggplot2)
+library(purrr)
+library(tibble)
+library(tidyr)
+```
+
+Alice and Bob are playing a game where they label N coins 1 through N and then flip all N of them at the same time. Alice checks the coins that they’ve flipped in order (1, 2, 3, ...) while Bob first checks the odd coins in order and then the even ones in order.
+
+Whoever finds two heads first (not necessarily back to back) is the winner. Who is more likely to win?
+
+```{r}
+data <- map(2:20, \(.coins) {
+  map(2, \(.stop) {
+    map(1:10000, \(.trial) {
+      flips <- rbinom(.coins, 1, 0.5)
+      flips_1 <- flips
+      flips_2 <- flips[c(seq(1, .coins, 2), seq(2, .coins, 2))]
+      
+      tibble(
+        coins = .coins,
+        stop = .stop,
+        trial = .trial,
+        which_stop_1 = which.max(cumsum(flips_1) == .stop),
+        which_stop_2 = which.max(cumsum(flips_2) == .stop)
+      )
+    }) %>%
+      list_rbind()
+  }) %>%
+    list_rbind()
+}) %>% 
+  list_rbind()
+```
+
+```{r}
+data %>% 
+  mutate(
+    win_1 = which_stop_1 < which_stop_2,
+    tie   = which_stop_1 == which_stop_2,
+    win_2 = which_stop_1 > which_stop_2
+  ) %>% 
+  summarize(
+    n_win_1 = sum(win_1),
+    n_tie   = sum(tie),
+    n_win_2 = sum(win_2),
+    p_win_1 = n_win_1 / n(),
+    p_tie   = n_tie / n(),
+    p_win_2 = n_win_2 / n(),
+    .by = c(coins, stop)
+  ) %>% 
+  pivot_longer(cols = c(p_win_1, p_tie, p_win_2)) %>% 
+  mutate(
+    name = case_when(
+      name == "p_tie" ~ "Tie", 
+      name == "p_win_1" ~ "Player 1 Win", 
+      name == "p_win_2" ~ "Player 2 Win",
+      .default = NA_character_
+    )
+  ) %>% 
+  ggplot(aes(coins, value, color = name, group = name)) + 
+  geom_point() + 
+  geom_smooth(method = 'loess', formula = 'y ~ x', se = FALSE) + 
+  labs(x = "Number of Coins", y = "Probability", color = "Outcome")
+```
+
+
+
+```{r}
+dnbinom(0, 2, 0.5)
+dnbinom(1, 2, 0.5)
+dnbinom(2, 2, 0.5)
+dnbinom(3, 2, 0.5)
+
+x <- 2:10
+plot(x, dnbinom(x - 2, 2, 0.5))
+```
+
