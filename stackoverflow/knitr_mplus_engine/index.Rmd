@@ -1,0 +1,80 @@
+---
+title: "Example MPlus Knitr Engine"
+output: html_document
+date: "2024-10-23"
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+
+knitr::knit_engines$set(mplus = function(options) {
+  # never echo mplus code block contents as we define them to be empty
+  options$echo <- FALSE
+  
+  # make a note of the original working directory so we might revert later
+  old_wd <- getwd()
+  
+  # make temp directory to perform mplus work
+  new_wd <- tempdir()
+  
+  # copy .inp to temp
+  inp_file_from <- options$engine.opts$file
+  inp_file_name <- basename(inp_file_from)
+  inp_file_to   <- file.path(new_wd, inp_file_name)
+  file.copy(inp_file_from, inp_file_to)
+  
+  # identify .dat file from .inp via regex
+  #   read code as vector of lines
+  mplus_code <- readLines(inp_file_to)
+  #   identify line which starts with DATA... line
+  data_line_index <- which(grepl("DATA:\tFILE IS", mplus_code))
+  #   subset to data line
+  data_line <- mplus_code[data_line_index]
+  #   replace chars before and after data file name with empty string
+  dat_file_name <- gsub("(.+IS |;)", "", data_line)
+  
+  # copy .dat file to temp
+  dat_file_from <- sprintf("assets/data/mplus/%s", dat_file_name)
+  dat_file_to   <- file.path(new_wd, dat_file_name)
+  file.copy(dat_file_from, dat_file_to)
+  
+  # set the working directory to temp directory
+  setwd(new_wd)
+  
+  # run MPlus against the input file
+  system2("C:/Program Files/Mplus Demo/Mpdemo8.exe", inp_file_name)
+  # output file will be same name as input but with .out extension
+  out_file = sprintf("%s.out", tools::file_path_sans_ext(inp_file_name))
+  # read from the output file
+  out <- readLines(out_file)
+  
+  # revert the working directory
+  setwd(old_wd)
+  # return output
+  knitr::engine_output(options, options$code, out)
+})
+```
+
+# Create Directory Structure
+
+```{r}
+dir.create("assets/code/mplus", recursive = TRUE)
+dir.create("assets/data/mplus", recursive = TRUE)
+download.file("http://www.statmodel.com/usersguide/chap3/ex3.1.dat", "assets/data/mplus/ex3.1.dat")
+```
+
+# MPlus Code
+
+```{cat, engine.opts = list(file = "assets/code/mplus/ex3.1.inp"), class.source='mplus'}
+TITLE:	this is an example of a simple linear
+	regression for a continuous observed
+	dependent variable with two covariates
+DATA:	FILE IS ex3.1.dat;
+VARIABLE:	NAMES ARE y1 x1 x3;
+MODEL:	y1 ON x1 x3;
+```
+
+# MPlus Output
+
+```{mplus, engine.opts = list(file = "assets/code/mplus/ex3.1.inp")}
+```
