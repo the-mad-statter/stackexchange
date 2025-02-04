@@ -1,0 +1,58 @@
+---
+title: "Encrypt Excel File via VBS"
+format: html
+editor: visual
+---
+
+```{r}
+protect_workbook <- function(wb, pass) {
+  
+  if(Sys.info()['sysname'] != "Windows"){
+    stop('The this function requires Windows operating system.')
+  }
+  
+  wb_path <- file.path(getwd(), wb)
+  vbs_path <- file.path(getwd(), "tmp.vbs")
+
+  writeLines(
+    text = c(
+      'Set objExcel = CreateObject("Excel.Application")',
+      'objExcel.Visible = False',
+      'objExcel.DisplayAlerts = False',
+      sprintf('Set wb = objExcel.Workbooks.Open("%s")', normalizePath(wb_path)),
+      'wb.Saved = False',
+      sprintf('wb.Password = "%s"', pass),
+      'wb.Save',
+      'wb.Close (TRUE)',
+      'objExcel.Quit'
+    ),
+    con = vbs_path
+  )
+
+  shell(shQuote(normalizePath(vbs_path)), "cscript", flag = "//nologo")
+
+  invisible(file.remove(vbs_path))
+}
+```
+
+```{r}
+library(openxlsx)
+    
+# Create some sample data
+df1 <- data.frame(A = 1:5, B = letters[1:5])
+df2 <- data.frame(X = 10:14, Y = LETTERS[10:14])
+    
+# Create a multi-sheet Excel file 
+wb <- createWorkbook()
+addWorksheet(wb, "Sheet1")
+writeData(wb, "Sheet1", df1)
+addWorksheet(wb, "Sheet2")
+writeData(wb, "Sheet2", df2)
+    
+# Save the file
+file_name <- "test.xlsx"
+saveWorkbook(wb, "test.xlsx")
+
+# protect the workbook
+protect_workbook(file_name, "opensesame")
+```
