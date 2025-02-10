@@ -1,0 +1,59 @@
+---
+title: ""
+author: ""
+output:
+  bookdown::pdf_document2:
+    toc: false
+bibliography: references.bib
+csl: springer-basic-brackets-1.csl
+nocite: '@*'
+---
+
+# Step 1
+
+First we edit our original citation style language file "springer-basic-brackets.csl" to use a sorting order with no key.
+
+To do so on line 77 we insert:
+
+```
+    <!-- begin add sort -->
+    <sort>
+      <key/>
+    </sort>
+    <!-- end add sort -->
+```
+
+Then we save the file as "springer-basic-brackets-1.csl" and update our yaml with
+
+```
+csl: springer-basic-brackets-1.csl
+```
+
+# Step 2
+
+Then we make sure to include the following in our yaml:
+
+```
+nocite: '@*'
+```
+
+# Step 3
+
+Then we are able to cite as desired:
+
+* all references in our bibliography file "references.bib" will be included
+* our bibliography will mirror the order of references in "references.bib"
+* our in-text citations will point to the correct bibliography entry
+* other than bibliography order we will continue to follow the springer basic style
+
+# Example
+
+First we cite Item 4 [@item4]. **Item 4** will appear **last** in our bibliography because it appears last in our bibliography file.
+
+Then we do not cite Item 1. Although Item 1 is not cited, it will still appear in our bibliogrpahy due to the yaml `nocite`, and although Item 4 was previously cited, **Item 1** will appear **first** in our bibliography because it appears first in our bibliography file.
+
+Then we choose to cite Item 2 [@item2]. However, **Item 2** will appear **third** in our bibliography to match the order of appearance in our bibliography file.
+
+We will not cite Item 3. However, **Item 3** will be included in our bibliography due to our yaml `nocite` and will appear **second** due to the order of our bibliography file.
+
+# References {-}
