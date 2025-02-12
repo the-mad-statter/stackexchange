@@ -1,0 +1,33 @@
+---
+title: "A Title"
+params: 
+  tstamp: !r format(Sys.time(), "%Y%m%d.%H%M%S")
+  extension: "html"
+output: html_document
+knit: |
+  (function(input, ...) {
+    rmd_lines <- readLines(input)
+    yaml_delim <- grep("---", rmd_lines)
+    yaml_lines <- rmd_lines[yaml_delim[1] + 1:yaml_delim[2] - 1]
+    yaml <- yaml::read_yaml(text = yaml_lines)
+    output_file <- paste(
+      eval(parse(text = yaml$params$tstamp)),
+      yaml$params$extension,
+      sep = "."
+    )
+    
+    rmarkdown::render(
+      input,
+      output_file = output_file,
+      envir = globalenv()
+    )
+  })
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+# A Header
+
+Hello World!
