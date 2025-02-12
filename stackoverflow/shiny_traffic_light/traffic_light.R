@@ -8,9 +8,7 @@ ui <- fluidPage(
       function changeBackgroundColor(color1, interval1, color2, interval2, elementId) {
         let isColor1 = true;
         
-        function updateColor() {
-          clearTimeout(myTimeout);
-          
+        function updateColor() {          
           const element = document.getElementById(elementId);
           
           element.style.backgroundColor = isColor1 ? color1 : color2;
@@ -18,7 +16,9 @@ ui <- fluidPage(
           
           myTimeout = setTimeout(updateColor, isColor1 ? interval2 : interval1);
         }
-        
+
+        clearTimeout(myTimeout);
+
         updateColor();
       };
     
