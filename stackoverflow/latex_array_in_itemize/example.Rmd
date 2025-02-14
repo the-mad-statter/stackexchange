@@ -1,0 +1,10 @@
+---
+title: "Alignment of array in unordered  list"
+output: bookdown::gitbook
+---
+
+# First header
+  
+- First point of unordered list
+- $\begin{array}{l l l} \\ text_1 & & \\ text_2 & & \\ & text_{31} & \\ & text_{32} & \\ & & text_4 \\ \end{array}$
+- Some following points...
