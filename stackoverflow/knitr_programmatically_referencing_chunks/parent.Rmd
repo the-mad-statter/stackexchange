@@ -1,0 +1,72 @@
+---
+title: "Programmatically Referencing Chunks"
+output: html_document
+date: "2025-02-14"
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = FALSE)
+```
+
+# Original Chunks {.tabset .tabset-pills}
+
+## Chunk 1
+
+```{r chunk-1}
+"Chunk 1 contents"
+```
+
+## Chunk 2
+
+```{r chunk-2}
+summary(cars)
+```
+
+## Chunk 3
+
+```{r chunk-3}
+plot(pressure)
+```
+
+# Referenced Chunks {.tabset .tabset-pills}
+
+```{r, echo=FALSE, results='asis'}
+# create vector of chunk labels to iterate over
+all_chunk_labels <- knitr::all_labels()
+desired_chunk_labels <- all_chunk_labels[grepl("^chunk", all_chunk_labels)]
+
+for(chunk_label in desired_chunk_labels) {
+  # output markdown for header
+  cat(paste("## Chunk", sub("chunk-", "", chunk_label)))
+
+  # construct child.Rmd using ref.label chunk option
+  c(
+    sprintf('```{r, ref.label="%s"}', chunk_label),
+    '```'
+  ) |>
+    writeLines("child.Rmd")
+  
+  # knit child and output results
+  res <- knitr::knit_child('child.Rmd', quiet = TRUE)
+  cat(res, sep = '\n')
+  
+  # clean up
+  unlink("child.Rmd")
+}
+```
+
+```{r, echo=FALSE, eval=FALSE}
+# child.Rmd contents alternate 1
+c(
+  '```{r}',
+  knitr::knit_code$get(chunk_label)[[1]],
+  '```'
+)
+
+# child.Rmd contents alternate 2
+c(
+  '```{r}',
+  sprintf("<<%s>>", chunk_label),
+  '```'
+)
+```
