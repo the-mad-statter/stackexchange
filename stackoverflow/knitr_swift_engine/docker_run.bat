@@ -1,0 +1,1 @@
+docker run --security-opt seccomp=unconfined --rm -ti -p 8787:8787 swiftr

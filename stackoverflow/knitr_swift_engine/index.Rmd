@@ -1,0 +1,65 @@
+---
+title: "Untitled"
+output: html_document
+date: "2025-03-04"
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+
+knitr::knit_engines$set(swift = function(options) {
+  # collapsed code from the chunk currently being processed
+  current_code <- paste(options$code, collapse = '\n')
+  
+  # all chunk names with engine set to swift
+  swift_chunk_names <- knitr::all_labels(engine == "swift")
+  
+  # code accumulation location
+  cummulative_code <- NULL
+  
+  # for each swift chunk in order of appearance
+  for(swift_chunk_name in swift_chunk_names) {
+    # get a collapsed copy of the code
+    prior_code <- paste(knitr::knit_code$get(swift_chunk_name), collapse = '\n')
+    
+    # if the prior code is identical to the current chunk's code
+    if(current_code == prior_code) {
+      # just append the code to our accumulator
+      cummulative_code <- c(cummulative_code, prior_code)
+      # and break out of the for loop
+      break
+    }
+    else {
+      # else strip print statements from the code before appending
+      cummulative_code <- c(cummulative_code, gsub("print\\(.+?\\)", "", prior_code))
+    }
+  }
+  
+  # collapse the accumulated code
+  code <- paste(cummulative_code, collapse = '\n')
+  
+  # run the code through swift
+  out <- system2(
+      command = "swift",
+      args = "repl",
+      input = code,
+      stdout = TRUE,
+      stderr = TRUE
+  )
+  
+  # output, allowing options and original code to pass through
+  knitr::engine_output(options, options$code, out)
+})
+```
+
+```{swift}
+import Foundation
+let helloText: String = "Hello from Swift REPL"
+print(helloText)
+```
+
+```{swift}
+let punctuationMark: String = "!"
+let helloTwo:String = helloText + punctuationMark
+print(helloTwo)
+```
