@@ -6,21 +6,10 @@ params:
 output: html_document
 knit: |
   (function(input, ...) {
-    rmd_lines <- readLines(input)
-    yaml_delim <- grep("---", rmd_lines)
-    yaml_lines <- rmd_lines[yaml_delim[1] + 1:yaml_delim[2] - 1]
-    yaml <- yaml::read_yaml(text = yaml_lines)
-    output_file <- paste(
-      eval(parse(text = yaml$params$tstamp)),
-      yaml$params$extension,
-      sep = "."
-    )
-    
-    rmarkdown::render(
-      input,
-      output_file = output_file,
-      envir = globalenv()
-    )
+    yaml <- rmarkdown::yaml_front_matter(input)
+    file_path_sans_ext <- eval(parse(text = yaml$params$tstamp))
+    output_file <- sprintf("%s.%s", file_path_sans_ext, yaml$params$extension)
+    rmarkdown::render(input, output_file = output_file)
   })
 ---
 
