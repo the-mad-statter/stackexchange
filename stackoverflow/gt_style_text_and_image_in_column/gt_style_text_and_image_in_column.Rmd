@@ -1,0 +1,56 @@
+---
+title: "Untitled"
+output: html_document
+date: "2025-06-20"
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+
+library(gt)
+```
+
+```{r}
+dtf <- structure(
+  list(
+    team = c("PSG", "Manchester City"),
+    prob_s1 = c(0.181818181818182, 0.166666666666667),
+    prob_s2 = c(0.277777777777778, 0.166666666666667)
+  ),
+  row.names = c(NA, -2L),
+  class = c("tbl_df", "tbl", "data.frame")
+)
+```
+
+```{r}
+span_tag <- function(text,
+                     image_basename,
+                     span_font_size = 20,
+                     img_height = 40,
+                     img_vertical_align = "middle",
+                     img_margin_left = 20,
+                     image_dirname = ".") {
+  img_path <- file.path(image_dirname, image_basename)
+  img_tag_1 <- gt::local_image(img_path, img_height)
+  img_css_to_add <- sprintf("vertical-align:%s;margin-left:%ipx;",
+                            img_vertical_align,
+                            img_margin_left)
+  img_tag_2 <- sub(r"(px;">)",
+                   sprintf(r"(px;%s">)", img_css_to_add),
+                   img_tag_1)
+  sprintf(r"(<span style="font-size:%ipt">%s%s</span>)",
+          span_font_size,
+          text,
+          img_tag_2)
+}
+```
+
+```{r}
+dtf %>%
+  gt() %>%
+  text_transform(
+    fn = \(x) span_tag(x, sprintf("%s.png", x)),
+    locations = cells_body(columns = team)
+  )
+```
+
