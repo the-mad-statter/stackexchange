@@ -1,0 +1,16 @@
+---
+title: "test"
+date: "2025-09-26"
+---
+
+The document uses footnote for citation.[^1] The style that I use is OSCOLA. To separate text note from citation, I use [\@bibkey] rather than \@bibkey for citation and the rest note text is put outside the [] square bracket. Because in addition to citation, we often need to discuss a bit alongside. Not to mention the dots or comma, prefix or suffix complexities. So in general, it is clearer to separate them.
+    
+[^1]: Such as this. Normal text in footnote.
+    
+It works well when there is no text before the citation.[^2] However, when there is text before the [\@bibkey], the rendered citation is surrounded by extra parentheses.[^3] How can I remove the parentheses without modifying the original [\@bibkey] format?
+    
+[^2]: [@Einstein1935]. If I talk here, it seems fine. No extra bracket.
+    
+[^3]: See, for example, [@Feynman1969].
+
+# Bibliography

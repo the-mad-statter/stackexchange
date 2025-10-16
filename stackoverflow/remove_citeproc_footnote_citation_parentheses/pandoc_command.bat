@@ -1,0 +1,1 @@
+"C:/Program Files/RStudio/resources/app/bin/quarto/bin/tools/pandoc" test.md --bibliography=library.bib --citeproc --csl=oscola.csl --lua-filter=citations_in_footnotes_fixer.lua -o test.docx
